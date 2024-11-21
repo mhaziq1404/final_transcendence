@@ -1,0 +1,383 @@
+{% extends 'main.html' %}
+{% block content %}
+
+<!-- /*==============================
+=>  AI Room
+================================*/ -->
+
+{% if room.host == request.user and room.opponent_type == 'AI' %}
+<div class="d-flex flex-grow-1 justify-content-center align-items-center bg-dark p-4" style="height: 40rem;">
+    <div class="bg-white w-100 rounded-lg shadow-lg mx-auto" style="max-width: 64rem;">
+      <div class="d-flex justify-content-between align-items-center border-bottom border-secondary p-4">
+        <div>
+          <div class="h5 font-weight-bold text-dark">{{room.host.username}} Lobby</div>
+          <!-- <div class="text-muted">Get Ready To Fight our AI</div> -->
+        </div>
+      </div>
+      <div class="px-4">
+        <div class="d-flex justify-content-between align-items-center border rounded-lg shadow-sm p-4 my-4">
+          <div class="d-flex align-items-center">
+            <img class="rounded-circle" src="{{room.host.avatar.url}}" alt="Logo" style="width: 48px; height: 48px;" />
+            <div class="ml-2">
+              <div class="font-weight-bold text-secondary">You</div>
+              <div class="text-muted">{{room.host.bio}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center w-100">
+          <div class="flex-grow-1 border-bottom border-muted"></div>
+          <span class="px-4 py-2 font-weight-bold text-dark">VS</span>
+          <div class="flex-grow-1 border-bottom border-muted"></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center border rounded-lg shadow-sm p-4 my-4">
+          <div class="d-flex align-items-center">
+            <img width="50" height="50" src="https://img.icons8.com/ios/50/bot.png" alt="bot"/>
+            <div class="ml-2">
+              <div class="font-weight-bold text-secondary">Our Mighty Pong AI</div>
+              <div class="text-muted">The Ultimate Challenger - Unstoppable</div>
+            </div>
+          </div>
+        </div>
+        <div class="p-4">
+          <a href="{% url 'pong' room.id %}" class="btn btn-teal w-100 py-3 rounded-lg shadow-lg font-weight-medium text-white" style="background: linear-gradient(to right, #38b2ac, #319795); transition: transform 0.3s ease-in-out;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            Start the game
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}  
+
+
+<!-- /*==============================
+=>  vs Player Room
+================================*/ -->
+
+{% if room.opponent_type == 'vs Player' %}
+<div class="d-flex flex-column pt-4 px-4 pb-4" style="background-color: #1a202c; position: relative; min-height: 40rem;">
+    {% include 'room/invite_friend_modal.html' %}
+    {% include 'room/popup_kickedout.html' %}
+    <!-- Lobby Container -->
+    <div class="w-100 rounded-md mb-4">
+        <div class="bg-white rounded-lg shadow">
+            {% if request.user == room.host %}
+            <div class=" p-4 d-flex justify-content-center align-items-center" style="background-color: #1a202c">
+                <div class="bg-white w-100 rounded-lg shadow" style="max-width: 64rem;">
+                    <div class="d-flex justify-content-between align-items-center border-bottom border-light p-4">
+                        <div>
+                            <div class="h5 font-weight-bold text-secondary">{{ room.host.username }} Lobby</div>
+                            <div class="text-muted small">Waiting Player to Join...</div>
+                        </div>
+                    </div>
+                    <div class="px-4">
+                        <div class="d-flex justify-content-between align-items-center h-100 p-4 my-3 rounded-lg border shadow-sm">
+                            <div class="d-flex align-items-center">
+                                <img class="rounded-circle" style="height: 3rem; width: 3rem;" src="{{ room.host.avatar.url }}" alt="Logo" />
+                                <div class="ml-2">
+                                    <div class="small font-weight-bold text-secondary">You</div>
+                                    <div class="small text-muted">{{ room.host.bio }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex w-100 align-items-center">
+                            <div class="flex-grow-1 border-bottom border-muted"></div>
+                            <span class="font-weight-bold text-black text-lg px-4 py-2">VS</span>
+                            <div class="flex-grow-1 border-bottom border-muted"></div>
+                        </div>
+                        <div id="player_list_container">
+                            {% include 'room/vsplayer.html' %}
+                        </div>
+                        <div class="d-flex bg-light justify-content-center align-items-center h-100 p-4 my-3 rounded-lg shadow-inner">
+                            <a id="inviteBtn" href="#" class="d-flex align-items-center border border-secondary p-2 border-dashed rounded cursor-pointer">
+                                <div>
+                                    <svg class="text-muted" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </div>
+                                <div class="ml-1 text-muted font-weight-medium">Invite a friend</div>
+                            </a>
+                        </div>                        
+                    </div>
+                    <div class="p-4">
+                        <!-- Disable the button if the opponent is not ready -->
+                        <a href="{% url 'pong' room.id %}"
+                           class="btn h-100 d-flex align-items-center justify-content-center w-100 bg-teal text-white font-weight-medium"
+                           style="background: linear-gradient(to right, #38b2ac, #319795); transition: all 0.3s ease-in-out;"
+                           {% if not room.opp_ready %}disabled style="opacity: 0.5;"{% endif %}>
+                            Start the game
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class=" p-4 d-flex justify-content-center align-items-center" style="background-color: #1a202c">
+                <div class="bg-white w-100 rounded-lg shadow" style="max-width: 64rem;">
+                    <div id="player_list_container">
+                        {% include 'room/popup_kickedout.html' %}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-bottom border-light p-4">
+                        <div>
+                            <div class="h5 font-weight-bold text-secondary">{{ room.host.username }} Lobby</div>
+                        </div>
+                    </div>
+                    <div class="px-4">
+                        <div class="d-flex justify-content-between align-items-center h-100 p-4 my-3 rounded-lg border shadow-sm">
+                            <div class="d-flex align-items-center">
+                                <img class="rounded-circle" style="height: 3rem; width: 3rem;" src="{{ room.host.avatar.url }}" alt="Logo" />
+                                <div class="ml-2">
+                                    <div class="small font-weight-bold text-secondary">{{ room.host.username }}</div>
+                                    <div class="small text-muted">{{ room.host.bio }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex w-100 align-items-center">
+                            <div class="flex-grow-1 border-bottom border-muted"></div>
+                            <span class="font-weight-bold text-black text-lg px-4 py-2">VS</span>
+                            <div class="flex-grow-1 border-bottom border-muted"></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center h-100 p-4 my-3 rounded-lg border shadow-sm">
+                            <div class="d-flex align-items-center">
+                                <img class="rounded-circle" style="height: 3rem; width: 3rem;" src="{{ request.user.avatar.url }}" alt="Logo" />
+                                <div class="ml-2">
+                                    <div class="small font-weight-bold text-secondary">You</div>
+                                    <div class="small text-muted">{{ request.user.bio }}</div>
+                                </div>
+                            </div>
+                            <div>
+                                <!-- Hidden form -->
+                                <form id="postForm" action="" method="POST" style="display: none;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="leave-room">
+                                </form>
+    
+                                <!-- Anchor tag -->
+                                <a href="#" class="btn bg-danger text-white p-2 rounded-circle shadow-md d-flex justify-content-center align-items-center" onclick="document.getElementById('postForm').submit(); return false;">
+                                    <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"/>
+                                    </svg>  
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <!-- Ready button form -->
+                        <form method="POST">
+                            {% csrf_token %}
+                            {% if room.opp_ready %}
+                                <button type="button"
+                                        class="btn h-100 w-100 bg-secondary text-white disabled">
+                                    Waiting for host to start the game
+                                </button>
+                            {% else %}
+                                <input type="hidden" name="action" value="ready">
+                                <button type="submit"
+                                        class="btn h-100 w-100 bg-teal text-white"
+                                        style="background: linear-gradient(to right, #38b2ac, #319795); transition: all 0.3s ease-in-out;">
+                                    Ready
+                                </button>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
+
+<!-- /*==============================
+=>  Tournament Room
+================================*/ -->
+
+{% if room.opponent_type == 'Tournament' %}
+<main class="d-flex flex-column pt-4 ps-3 pe-3 pb-4" style="height: calc(100vh - 100px); background-color: #1f2937; position: relative;">
+    {% include 'room/invite_friend_modal.html' %}
+    <!-- Lobby Container -->
+    <div class="w-100 bg-dark rounded mb-4">
+        <div class="bg-white rounded shadow">
+            <!-- <a href="{% url 'podium_view' pk=room.id %}" class="btn h-100 d-flex align-items-center justify-content-center bg-teal text-white w-100 rounded shadow-lg text-xl fw-medium transition-transform scale-105">
+                View Podium
+            </a> -->
+
+            {% if request.user == room.host %}
+            <div class="bg-dark p-4 d-flex justify-content-center align-items-center">
+                <div class="bg-white w-100 rounded shadow">
+                    <div class="d-flex justify-content-between align-items-center border-bottom m-4 pb-4">
+                        <div>
+                            <h5 class="fw-bold text-secondary">{{ room.host.username }} Lobby</h5>
+                            <p class="small text-muted">Waiting for more players...</p>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center justify-content-center shadow rounded-pill">
+                                <label for="toogleA" class="form-switch">
+                                    <input id="toogleA" type="checkbox" class="form-check-input" />
+                                    <div class="switcher">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="white" class="icon-6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                        </svg>                                              
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4">
+                        <div class="d-flex justify-content-between align-items-center h-100 p-4 mb-4 rounded border shadow-sm">
+                            <div class="d-flex align-items-center">
+                                <img class="rounded-circle" src="{{ room.host.avatar.url }}" alt="Logo" style="height: 48px; width: 48px;" />
+                                <div class="ms-2">
+                                    <div class="fw-bold text-secondary">You</div>
+                                    <p class="text-muted small">{{ room.host.bio }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center w-100">
+                            <hr class="flex-grow-1 border" />
+                            <span class="px-4">VS</span>
+                            <hr class="flex-grow-1 border" />
+                        </div>
+                        <div id="player_list_container">
+                          {% include 'room/vsplayer.html' %}
+                        </div>
+                        <div class="d-flex justify-content-center align-items-center bg-light h-100 p-4 mb-4 rounded shadow-inner">
+                            <a id="inviteBtn" href="#" class="d-flex align-items-center border border-secondary p-2 border-dashed rounded cursor-pointer">
+                                <svg class="text-secondary me-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="height: 24px; width: 24px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                <span class="text-secondary fw-medium">Invite a friend</span>
+                            </a>
+                        </div>                        
+                    </div>
+                    <div class="p-4">
+                        <a href="{% url 'tournament_view' room.id %}"
+                           class="btn h-100 d-flex align-items-center justify-content-center w-100 bg-teal text-white font-weight-medium"
+                           style="background: linear-gradient(to right, #38b2ac, #319795); transition: all 0.3s ease-in-out;"
+                           {% if not room.opp_ready %}disabled style="opacity: 0.5;"{% endif %}>
+                            Start the game
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="bg-dark p-4 d-flex justify-content-center align-items-center" style="height: 57rem;">
+                <div class="bg-white w-100 rounded shadow">
+                    <div id="player_list_container">
+                        {% include 'room/popup_kickedout.html' %}
+                        {% include 'room/invite_friend_modal.html' %}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-bottom m-4 pb-4">
+                        <h5 class="fw-bold text-secondary">{{ room.host.username }} Lobby</h5>
+                    </div>
+                    <div class="px-4">
+                        <div class="d-flex justify-content-between align-items-center h-100 p-4 mb-4 rounded border shadow-sm">
+                            <div class="d-flex align-items-center">
+                                <img class="rounded-circle" src="{{ room.host.avatar.url }}" alt="Logo" style="height: 48px; width: 48px;" />
+                                <div class="ms-2">
+                                    <div class="fw-bold text-secondary">{{ room.host.username }}</div>
+                                    <p class="text-muted small">{{ room.host.bio }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center w-100">
+                            <hr class="flex-grow-1 border" />
+                            <span class="px-4">VS</span>
+                            <hr class="flex-grow-1 border" />
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center h-100 p-4 mb-4 rounded border shadow-sm">
+                            <div class="d-flex align-items-center">
+                                <img class="rounded-circle" src="{{ request.user.avatar.url }}" alt="Logo" style="height: 48px; width: 48px;" />
+                                <div class="ms-2">
+                                    <div class="fw-bold text-secondary">You</div>
+                                    <p class="text-muted small">{{request.user.bio}}</p>
+                                </div>
+                            </div>
+                            <div>
+                                <!-- Hidden form -->
+                                <form id="postForm" action="" method="POST" style="display: none;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="leave-room">
+                                </form>
+              
+                                <!-- Anchor tag -->
+                                <a href="#" class="btn btn-danger d-flex align-items-center justify-content-center rounded-pill" onclick="document.getElementById('postForm').submit(); return false;">
+                                    <svg class="text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"/>
+                                    </svg>  
+                                </a>
+                            </div>
+                        </div>
+                        <div id="player_list_container">
+                            {% include 'room/vsplayer.html' %}
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        {% if room.opp_ready %}
+                                <button type="button"
+                                        class="btn h-100 w-100 bg-secondary text-white disabled">
+                                    Waiting for host to start the game
+                                </button>
+                            {% else %}
+                                <input type="hidden" name="action" value="ready">
+                                <button type="submit"
+                                        class="btn h-100 w-100 bg-teal text-white"
+                                        style="background: linear-gradient(to right, #38b2ac, #319795); transition: all 0.3s ease-in-out;">
+                                    Ready
+                                </button>
+                            {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</main>
+
+{% endif %}
+
+
+{% if room.opponent_type == 'vs Player' or room.opponent_type == 'Tournament' %}
+<!-- /*==============================
+=>  Footer
+================================*/ -->
+
+<!-- <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1001;">
+    <button id="chatbox-toggle" class="btn btn-teal rounded-circle shadow-sm" style="width: 56px; height: 56px; z-index: 1002;">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+      </svg>
+    </button>
+</div> -->
+
+  
+
+
+<!-- Chatbox -->
+<!-- <div id="chatbox" class="position-fixed bottom-3 end-0 bg-white rounded-top shadow h-100" style="height: 40rem; width: 60rem; z-index: 500;">
+    {% include 'chat/chat_in_room.html' %}
+  </div> -->
+  
+
+{% endif %}
+
+{% endblock %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const chatboxToggle = document.getElementById("chatbox-toggle");
+  const chatbox = document.getElementById("chatbox");
+  const chatboxClose = document.getElementById("chatbox-close");
+
+  // Toggle the visibility of the chatbox
+  chatboxToggle.addEventListener("click", () => {
+    chatbox.style.display = chatbox.style.display === "none" || chatbox.style.display === "" ? "block" : "none";
+  });
+
+  // Close the chatbox
+  chatboxClose.addEventListener("click", () => {
+    chatbox.style.display = "none"; // Hide the chatbox when the close button is clicked
+  });
+});
+
+</script>

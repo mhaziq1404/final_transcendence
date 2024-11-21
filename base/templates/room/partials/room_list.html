@@ -1,0 +1,59 @@
+<div class="d-flex flex-column p-4">
+    {% for room in rooms %}
+        {% if room.is_expired == False %}
+            {% if room.opponent_type == 'AI' or room.opponent_type == 'vs Player'%}
+                {% if room.host == request.user %}
+                    <div class="position-relative d-flex flex-column align-items-center border border-secondary rounded-3 transition-all duration-500 flex-md-row w-100 bg-white">
+                        <!-- <div class="overflow-hidden w-24 h-24 h-md-100 md-w-52">
+                            <img src="https://picsum.photos/200/300?random=2" alt="Random GIF" class="h-100 rounded-3 object-cover w-100" />
+                        </div> -->
+                        <div class="p-4 flex-grow-1">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <h4 class="h5 fw-semibold text-dark text-capitalize transition-all duration-500">
+                                    {{ room.name }}
+                                </h4>
+                                <span class="text-muted small">{{room.created|timesince}} ago</span>
+                            </div>
+                            <p class="small text-muted mb-5">{{ room.description }}</p>
+                            <div class="d-flex flex-wrap mb-3">
+                                <span class="badge bg-light text-dark me-2">
+                                    <strong>Points to Win:</strong> {{ room.points }}
+                                </span>
+                                <span class="badge bg-light text-dark me-2">
+                                    <strong>Opponent Type:</strong> {{ room.opponent_type }}
+                                </span>
+                            </div>
+                            <a href="{% url 'room' room.id %}" class="btn btn-info shadow-sm rounded-pill py-2 px-5 text-xs text-white fw-semibold">Join Room</a>
+                        </div>
+                    </div>
+                    <br>
+                {% endif %}
+            {% else %}
+                <div class="position-relative d-flex flex-column align-items-center border border-secondary rounded-3 transition-all duration-500 flex-md-row w-100 bg-white">
+                    <div class="overflow-hidden w-100 h-48 h-md-100 md-w-52">
+                        <img src="https://picsum.photos/200/300?random=3" alt="Random GIF" class="h-100 rounded-3 object-cover w-100" />
+                    </div>
+                    <div class="p-4 flex-grow-1">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h4 class="h5 fw-semibold text-dark text-capitalize transition-all duration-500">
+                                {{ room.name }}
+                            </h4>
+                            <span class="text-muted small">{{room.created|timesince}} ago</span>
+                        </div>
+                        <p class="small text-muted mb-5">{{ room.description }}</p>
+                        <div class="d-flex flex-wrap mb-3">
+                            <span class="badge bg-light text-dark me-2">
+                                <strong>Points to Win:</strong> {{ room.points }}
+                            </span>
+                            <span class="badge bg-light text-dark me-2">
+                                <strong>Opponent Type:</strong> {{ room.opponent_type }}
+                            </span>
+                        </div>
+                        <a href="{% url 'room' room.id %}" class="btn btn-info shadow-sm rounded-pill py-2 px-5 text-xs text-white fw-semibold">Join Room</a>
+                    </div>
+                </div>
+                <br>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+</div>

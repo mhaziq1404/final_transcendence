@@ -1,0 +1,111 @@
+<ul id="chat_messages" class="d-flex flex-column justify-content-end gap-2">
+    {% for message in chat_messages reversed %}
+        {% if message.author == user %}
+            {% if message.is_invitation == True %}
+                <!-- invitation from Current User -->
+                <div class="d-flex flex-row justify-content-end pt-1">
+                    <div style="padding-right: 1rem;">
+                        <div class="card" style="height: 9rem;">
+                            <div class="card-header">
+                                Invitation has been Sent.
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ message.room.name }}</h5>
+                                <p class="card-text">{{ message.room.description }}.</p>
+                            </div>
+                        </div>
+                    <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">You</p>
+                    </div>
+                    {% if message.author.avatar %}
+                        <img src="{{ message.author.avatar.url }}" alt="{{ message.author.username }}'s avatar" class="rounded-circle" style="width: 45px; height: 45px;">
+                    {% else %}
+                        <span style="width: 60px; height: 60px;">
+                            {{ message.author.username|slice:":1"|upper }}
+                        </span>
+                    {% endif %}
+                </div>
+            {% else %}
+                <!-- Message from Current User -->
+                <div class="d-flex flex-row justify-content-end pt-1">
+                    <div>
+                    <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">{{ message.body }}</p>
+                    <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">You</p>
+                    </div>
+                    {% if message.author.avatar %}
+                        <img src="{{ message.author.avatar.url }}" alt="{{ message.author.username }}'s avatar" class="rounded-circle" style="width: 45px; height: 45px;">
+                    {% else %}
+                        <span style="width: 60px; height: 60px;">
+                            {{ message.author.username|slice:":1"|upper }}
+                        </span>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            {% if message.is_invitation == True %}
+                <!-- Invitation Message from Other Users -->
+                <div class="col-md-12 p-3 rounded-lg">
+                    <div class="d-flex flex-column align-items-start">
+                        <div class="d-flex flex-row align-items-center">
+                            <div class="d-flex align-items-center justify-content-center h-10 w-10 rounded-circle bg-indigo-500 flex-shrink-0">
+                                {% if message.author.avatar %}
+                                    <a href="{% url 'user-profile' message.author.id %}">
+                                        <img src="{{ message.author.avatar.url }}" alt="{{ message.author.username }}'s avatar" class="rounded-circle" style="width: 45px; height: 45px;">
+                                    </a>
+                                {% else %}
+                                    <span style="width: 60px; height: 60px;">
+                                        {{ message.author.username|slice:":1"|upper }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <div class="relative text-sm bg-white py-2 px-4 shadow rounded text-black">
+                                <div class="card" style="height: 13rem;"> <!-- Set margin-bottom to 0 -->
+                                    <div class="card-header">
+                                        {{ message.body }}
+                                    </div>
+                                    <div class="card-body"> <!-- Adjust padding-bottom to reduce space -->
+                                        <h5 class="card-title">{{ message.room.name }}</h5>
+                                        <p class="card-text">{{ message.room.description }}.</p> <!-- Set margin-bottom to 0 or small -->
+                                        <form id="joinRoomForm" action="{% url 'join_room' %}" method="POST">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="invitation_link" value="{{ message.room.invitation_link }}" class="form-control" readonly>
+                                            <div>
+                                                <button type="submit" class="btn btn-primary">
+                                                    Join The Room
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Username display below the message content -->
+                        <div class="text-xs text-muted mt-1 ms-3">
+                            @{{ message.author.username }}
+                        </div>
+                    </div>
+                </div>
+
+
+        {% else %}
+            <!-- Message from Other Users -->
+            <div class="d-flex flex-row justify-content-start">
+                {% if message.author.avatar %}
+                    <a href="{% url 'user-profile' message.author.id %}">
+                        <img src="{{ message.author.avatar.url }}" alt="{{ message.author.username }}'s avatar" class="rounded-circle" style="width: 45px; height: 45px;">
+                    </a>
+                {% else %}
+                    <span style="width: 60px; height: 60px;">
+                        {{ message.author.username|slice:":1"|upper }}
+                    </span>
+                {% endif %}
+                <div>
+                <p class="small p-2 ms-3 mb-1 rounded-3 bg-light">{{ message.body }}</p>
+                <p class="small ms-3 mb-3 rounded-3 text-muted">@{{ message.author.username }}</p>
+                </div>
+            </div>
+        {% endif %}
+
+        {% endif %}
+    {% endfor %}
+</ul>
+

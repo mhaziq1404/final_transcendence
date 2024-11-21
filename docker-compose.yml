@@ -1,0 +1,205 @@
+services:
+  base:
+    build: ./
+    command: 
+      # sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --no-input && gunicorn studybud.asgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 300 --threads 2 --worker-class uvicorn.workers.UvicornWorker"
+      sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+        # python manage.py runserver 0.0.0.0:8000
+    ports: 
+      - "8000:8000"
+    networks:
+      - backend_net
+    links:
+      - postgresql:postgresql
+    volumes:
+      - ./:/app
+      - static:/usr/src/app/static
+      - media:/usr/src/app/static/images
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - postgresql
+    restart: unless-stopped
+  
+  nginx:
+    build: ./nginx
+    ports:
+      - "8081:8081"
+      - "4443:4443"
+    networks:
+      - backend_net
+    volumes:
+      - static:/app/staticfiles/
+      - media:/app/mediafiles/
+      # - ./services/nginx/conf/default.conf:/etc/nginx/nginx.conf:ro
+      - certs:/etc/nginx/ssl
+    env_file:
+      - .env
+    depends_on:
+      - base
+    restart: unless-stopped
+
+  postgresql:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    networks:
+      - backend_net
+    volumes:
+      - postgres_vol:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    restart: unless-stopped
+
+  node-exporter:
+    image: prom/node-exporter
+    networks:
+      - backend_net
+    ports:
+      - 9100:9100
+
+  alertmanager:
+    image: prom/alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - alertmanager_vol:/etc/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    networks:
+      - backend_net
+    restart: unless-stopped
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - backend_net
+    restart: unless-stopped
+
+  # thirdweb:
+  #   build:
+  #     context: ./web3
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - backend_net
+  #   restart: unless-stopped
+  
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
+    ports: 
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - ELASTIC_PASSWORD=${ES_PASSWORD}
+      - discovery.type=single-node
+      - cluster.name=elasticsearch
+      - cluster.routing.allocation.disk.threshold_enabled=false
+      - bootstrap.memory_lock=true
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch_vol:/usr/share/elasticsearch/data
+    networks:
+      - backend_net
+    restart: unless-stopped
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.12.1
+    environment:
+      - xpack.monitoring.enabled=false
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ES_PASSWORD}
+      - ELASTIC_HOSTS=http://elasticsearch:9200
+    volumes:
+      - ./logstash:/usr/share/logstash/pipeline
+    networks:
+      - backend_net
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.1
+    ports:
+      - 5601:5601
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - TELEMETRY_ENABLED=false
+    networks:
+      - backend_net
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - 9090:9090
+    networks:
+      - backend_net
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+    networks:
+      - backend_net
+
+  adminer:
+    build:
+     context: ./adminer
+     dockerfile: Dockerfile
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      - postgresql
+    networks:
+      - backend_net
+    ports:
+      - '2424:2424'
+
+volumes:
+  postgres_vol:
+  grafana_vol:
+  prometheus_vol:
+  prometheus_data: {}
+  grafana-data: {}
+  alertmanager_vol:
+  elasticsearch_vol:
+  certs:
+  static:
+  media:
+
+networks:
+  backend_net:
+    driver: bridge

@@ -1,0 +1,17 @@
+<div class="row">
+    <div class="col-6 text-start">
+      <p class="font-weight-bold">{{ match.player1 }}</p>
+    </div>
+    <div class="col-6 text-end">
+      <p>{{ match.player1_score|default:0 }}</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-6 text-start">
+      <p class="font-weight-bold">{{ match.player2 }}</p>
+    </div>
+    <div class="col-6 text-end">
+      <p>{{ match.player2_score|default:0 }}</p>
+    </div>
+  </div>
+  

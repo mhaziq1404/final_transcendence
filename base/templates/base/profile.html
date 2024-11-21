@@ -1,0 +1,107 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<main class="position-relative d-flex flex-column" style="padding-top: 2rem; min-height: 40rem; overflow-y: auto;">
+    <span id="current-username" style="display: none;">{{ user.username }}</span>
+    <div class="container d-flex flex-column px-3">
+        <!-- Avatar Section -->
+        <div class="text-center mb-4">
+            <img src="{{ user.avatar.url }}" alt="{{ user.username }}'s avatar" 
+                 class="rounded-circle img-fluid border border-white" 
+                 style="height: 15rem; width: 15rem; border-width: 4px;" id="user_img">
+        </div>
+
+        <!-- User Info Section -->
+        <div class="text-center mb-5">
+            <h3 class="fw-bold" style="font-size: 2.5rem;">{{ user.name }}</h3>
+            <p class="text-muted">@{{ user.username }}<br>{{ user.bio }}</p>
+            <!-- Action Buttons -->
+            <div>
+                {% if is_friend %}
+                    <a href="{% url 'create_privatechat' user.id %}" class="btn btn-primary rounded-pill me-2">Send Message</a>
+                    <a href="{% url 'remove_friend' user.id %}" class="btn btn-danger rounded-pill">Remove Friend</a>
+                {% elif friend_request_sent %}
+                    <a href="{% url 'cancel_friend_request' user.id %}" class="btn btn-warning rounded-pill">Cancel Request</a>
+                {% elif user == request.user %}
+                    <a href="{% url 'update-user' %}" class="btn btn-secondary rounded-pill">Edit Profile</a>
+                {% else %}
+                    <a href="{% url 'add_friend' user.id %}" class="btn btn-success rounded-pill">Add Friend</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Statistics Section -->
+        <section class="mt-5">
+            <h4 class="fw-bold mb-4">Statistics</h4>
+            <div class="row text-center">
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>{{ user_stats.matches_played }}</h5>
+                            <p>Matches Played</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>{{ user_stats.wins }}</h5>
+                            <p>Wins</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>{{ user_stats.losses }}</h5>
+                            <p>Losses</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>{{ user_stats.winrate }}%</h5>
+                            <p>Win Rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Match History Section -->
+        <section class="mt-5">
+            <h4 class="fw-bold mb-4">Match History</h4>
+            {% if match_history %}
+                <ul class="list-group">
+                    {% for match in match_history %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <strong>Match vs 
+                                    {% if match.player1 == user.username %}
+                                        {{ match.player2 }}
+                                    {% else %}
+                                        {{ match.player1 }}
+                                    {% endif %}
+                                </strong>
+                                <small>{{ match.timestamp|date:"M d, Y H:i" }}</small>
+                            </div>
+                            <p>Score: {{ match.score1 }} - {{ match.score2 }}</p>
+                            <p>
+                                Result: 
+                                {% if match.winner == user.username %}
+                                    <span class="text-success">Win</span>
+                                {% else %}
+                                    <span class="text-danger">Loss</span>
+                                {% endif %}
+                            </p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No match history available.</p>
+            {% endif %}
+        </section>
+    </div>
+</main>
+{% endblock content %}

@@ -1,0 +1,60 @@
+<div id="popup" class="modal fade" tabindex="-1" aria-labelledby="inviteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="inviteModalLabel">You have been Kicked out of the Lobby</h5>
+            </div>
+            <div class="modal-body">
+                <p>You will be redirected to the home page in a few seconds.</p>
+            </div>
+            <!-- <div class="modal-footer">
+
+            </div> -->
+        </div>
+    </div>
+</div>
+
+<script>
+let isPopupShown = false; // To ensure the modal is only shown once
+
+function showPopupAndRedirect() {
+    if (!isPopupShown) {
+        var popupModal = new bootstrap.Modal(document.getElementById('popup'));
+        popupModal.show();
+        isPopupShown = true; // Set flag to prevent re-showing
+
+        // Automatically redirect after 5 seconds
+        setTimeout(() => {
+            window.location.href = "{% url 'home' %}";
+        }, 3000); // 5000ms = 5 seconds
+    }
+}
+
+function checkKickoutStatus() {
+    fetch('{% url "check_status" %}?room_id={{ room.id }}&player_id={{ request.user.id }}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'kickedout') {
+                console.log('Kicked out');
+                showPopupAndRedirect(); // Only called once
+            }
+            {% if room.opponent_type == "Tournament" %}
+            if (data.status === 'started') {
+                const redirectUrl = "{% url 'tournament_view' room.id %}";
+                window.location.href = redirectUrl;
+            }
+            {% else %}
+            if (data.status === 'started') {
+                const redirectUrl = "{% url 'pong' room.id %}";
+                window.location.href
+            {% endif %}
+        })
+        .catch(error => {
+            console.error('Error fetching kickout status:', error);
+        });
+}
+
+// Poll the API every second
+setInterval(checkKickoutStatus, 1000);
+
+</script>

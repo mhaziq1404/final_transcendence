@@ -1,0 +1,142 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<main class="h-100 p-4" style="min-height: 40rem; background-color: #1a202c">
+  <!-- Stylish Countdown Timer -->
+  <div class="bg-gradient text-white rounded-xl d-flex flex-column align-items-center justify-content-center p-4 text-center mb-4 shadow-lg" style="background: linear-gradient(to right, #20c997, #12b886); height: 6rem;">
+    <span class="countdown font-mono display-4 animate-pulse">
+      <span id="countdown">10</span>
+    </span>
+    <span class="mt-2 h5 font-weight-bold">secs to the next game</span>
+  </div>
+
+  <!-- Bracket Title -->
+  <div class="mb-4 border-bottom border-secondary text-center text-base font-weight-bold text-white">
+    <div class="d-flex justify-content-between">
+      {% if opp_count == 8 %}
+        <div class="flex-grow-1 mx-5">Quarterfinals</div>
+        <div class="flex-grow-1 mx-5">Semifinals</div>
+        <div class="flex-grow-1 mx-5">Finals</div>
+      {% elif opp_count == 4 %}
+        <div class="flex-grow-1 mx-5">Semifinals</div>
+        <div class="flex-grow-1 mx-5">Finals</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Bracket Layout -->
+  <div class="row">
+    {% if opp_count == 8 %}
+      <!-- Quarterfinals -->
+      <div class="col-12 col-md-4 mb-4">
+        {% for match in matches.quarterfinals %}
+          <div class="rounded bg-secondary p-3 text-light mb-2">
+            {% include 'tournament/match_card.html' with match=match %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Semifinals -->
+      <div class="col-12 col-md-4 mb-4">
+        {% for match in matches.semifinals %}
+          <div class="rounded bg-secondary p-3 text-light mb-2">
+            {% include 'tournament/match_card.html' with match=match %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Finals -->
+      <div class="col-12 col-md-4 mb-4">
+        {% if matches.final %}
+          <div class="rounded bg-secondary p-3 text-light mb-2">
+            {% include 'tournament/match_card.html' with match=matches.final %}
+          </div>
+        {% endif %}
+      </div>
+
+    {% elif opp_count == 4 %}
+      <!-- Semifinals -->
+      <div class="col-6 mb-4">
+        {% for match in matches.semifinals %}
+          <div class="rounded bg-secondary text-light p-3 mb-2">
+            {% include 'tournament/match_card.html' with match=match %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Finals -->
+      <div class="col-6" style="padding-top: 3rem;">
+        {% if matches.final %}
+          <div class="mb-4 rounded bg-secondary text-light p-3">
+            {% include 'tournament/match_card.html' with match=matches.final %}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</main>
+
+<script>
+  // Room name for WebSocket
+  const roomName = "{{ room.id }}"; // Replace with dynamic room logic if necessary
+  
+  // Establish WebSocket connection
+  let socket = new WebSocket(`wss://${window.location.host}/ws/room/${roomName}/`);
+  
+  // Handle WebSocket errors
+  socket.onerror = function(error) {
+    console.error('WebSocket error:', error);
+  };
+  
+  // Log when the WebSocket connection is established
+  socket.onopen = function() {
+    console.log('WebSocket connection established');
+  };
+  
+  // Attempt to reconnect on WebSocket closure
+  socket.onclose = function(e) {
+    console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+    setTimeout(function() {
+      socket = new WebSocket(`wss://${window.location.host}/ws/room/${roomName}/`);
+    }, 1000);
+  };
+
+  // Redirect URL for the next page
+  const redirectUrl = "{% url 'pongTournament' room.id split_no %}";
+  
+  // Handle incoming WebSocket messages
+  socket.onmessage = function(event) {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === 'start_countdown') {
+        startCountdown(redirectUrl);
+      }
+    } catch (error) {
+      console.error('Error parsing WebSocket message:', error);
+    }
+  };
+
+  // Countdown logic
+  function startCountdown(redirectUrl) {
+    let countdown = 10;
+    const countdownElement = document.getElementById('countdown');
+
+    if (!countdownElement) {
+      console.error('Countdown element not found.');
+      return;
+    }
+
+    const countdownInterval = setInterval(() => {
+      countdownElement.textContent = countdown;
+      countdown--;
+
+      if (countdown < 0) {
+        clearInterval(countdownInterval);
+        window.location.href = redirectUrl;
+      }
+    }, 1000);
+  }
+</script>
+
+{% endblock %}

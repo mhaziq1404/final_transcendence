@@ -1,0 +1,95 @@
+<div id="inviteModal" class="modal fade" tabindex="-1" aria-labelledby="inviteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="inviteModalLabel">Invite a Friend</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Use the link below to invite a friend to join the game:</p>
+          <div class="mt-3">
+            <input type="text" value="{{ room.invitation_link }}" class="form-control" readonly>
+          </div>
+          <div class="mt-4">
+            <button id="dropdownSearchButton" class="btn btn-primary w-100" data-bs-toggle="dropdown" aria-expanded="false">
+              Send Invitation to Friend(s)
+              <svg class="bi bi-chevron-down ms-2" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+              </svg>
+            </button>
+            <ul id="dropdownSearch" class="dropdown-menu w-100">
+              <li>
+                <div class="input-group mb-3">
+                  <span class="input-group-text"><i class="bi bi-search"></i></span>
+                  <input type="text" id="input-group-search" class="form-control" placeholder="Search user">
+                </div>
+              </li>
+              <ul id="friend-list" class="list-group overflow-auto" style="max-height: 200px;">
+                {% for friend in friends %}
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="checkbox-item-{{ forloop.counter }}" value="{{ friend.id }}">
+                      <label class="form-check-label" for="checkbox-item-{{ forloop.counter }}">{{ friend.username }}</label>
+                    </div>
+                  </li>
+                {% endfor %}
+              </ul>
+              <button type="button" id="messageFriendsButton" class="btn btn-primary">Message Selected Friend(s)</button>
+            </ul>
+          </div>
+          <form id="messageFriendsForm" action="{% url 'invite_through_message' %}" method="POST" class="mt-3">
+            {% csrf_token %}
+            <input type="hidden" name="room_id" value="{{ room.id }}">
+            <input type="hidden" name="friend_ids" id="friend_ids">
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+
+<!-- JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inviteBtn = document.getElementById('inviteBtn');
+    const modal = new bootstrap.Modal(document.getElementById('inviteModal'));
+    const closeModalBtns = document.querySelectorAll('[data-bs-dismiss="modal"]');
+
+    inviteBtn.addEventListener('click', function() {
+        modal.show();
+    });
+
+    closeModalBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            modal.hide();
+        });
+    });
+
+    // Optional: Close the modal when clicking outside of it (handled automatically by Bootstrap)
+});
+
+document.getElementById('messageFriendsForm').addEventListener('submit', function(event) {
+    event.preventDefault();  // Prevent the default form submission
+
+    // Get all selected checkboxes
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    const selectedFriends = [];
+
+    // Collect the values of the selected checkboxes
+    checkboxes.forEach(function(checkbox) {
+        selectedFriends.push(checkbox.value);
+    });
+
+    // Set the hidden input value to the selected friend IDs
+    document.getElementById('friend_ids').value = selectedFriends.join(',');
+
+    // Now submit the form
+    this.submit();
+});
+
+
+</script>

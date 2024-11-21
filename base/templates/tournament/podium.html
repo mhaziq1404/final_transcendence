@@ -1,0 +1,39 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<main class="p-4 bg-dark text-white" style="background-color: #1a202c; min-height: 39.75rem;">
+    <h1 class="text-3xl font-weight-bold mb-4 text-center">Tournament Results</h1>
+    
+    <div class="d-flex justify-content-center mb-8">
+        <!-- Podium Layout -->
+        <div class="d-flex align-items-end justify-content-between position-relative">
+            <!-- Third Place (Bronze) -->
+            <div class="text-center p-4 w-25 h-110 rounded" style="background-color: #CD7F32;">
+                <span class="h4 font-weight-bold">3rd</span>
+                    <div class="mt-2">
+                        <img src="{{ player_no_3.avatar.url }}" alt="Third Place Player" class="w-25 h-25 mx-auto rounded-circle">
+                        <p class="mt-2">{{ player_no_3.username }}</p>
+                    </div>
+            </div>
+
+            <!-- First Place (Gold) -->
+            <div class="bg-warning text-center p-4 w-25 h-170 rounded position-relative" style="background-color: #FFD700;">
+                <span class="h4 font-weight-bold mt-4">1st</span>
+                    <div class="mt-4">
+                        <img src="{{ player_no_1.avatar.url }}" alt="First Place Player" class="w-30 h-30 mx-auto rounded-circle">
+                        <p class="mt-2">{{ player_no_1.username }}</p>
+                    </div>
+            </div>
+
+            <!-- Second Place (Silver) -->
+            <div class="text-center p-4 w-25 h-140 rounded" style="background-color: #3a3a3a;" >
+                <span class="h4 font-weight-bold">2nd</span>
+                    <div class="mt-2">
+                        <img src="{{ player_no_2.avatar.url }}" alt="Second Place Player" class="w-25 h-25 mx-auto rounded-circle">
+                        <p class="mt-2">{{ player_no_2.username }}</p>
+                    </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

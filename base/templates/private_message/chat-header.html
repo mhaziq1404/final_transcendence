@@ -1,0 +1,31 @@
+{% if group %}
+<div class="d-flex align-items-center py-4 px-4 rounded shadow bg-dark text-white">
+  {% for member in group.members.all %}
+    {% if member != request.user %}
+      <img
+        src="{{ member.avatar.url }}"
+        alt="avatar" class="d-flex align-self-center me-3" width="40" height="40">
+      <span class="badge bg-success badge-dot position-absolute top-0 start-100 translate-middle"></span>
+    {% endif %}
+  {% endfor %}
+  
+  <div class="d-flex flex-column ms-3">
+    <div class="fw-semibold small">{{ group.groupchat_name }}</div>
+    <div class="text-muted small">Active</div>
+  </div>
+  <div class="ms-auto">
+    <ul class="d-flex align-items-center list-unstyled mb-0">
+      <li class="me-2">
+        <a href="{% url 'block_group' group.group_name %}"
+           class="d-flex align-items-center justify-content-center bg-light text-muted rounded-circle" style="height: 40px; width: 40px;">
+          <span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="red" width="20" height="20">
+                  <path fill-rule="evenodd" d="m5.965 4.904 9.131 9.131a6.5 6.5 0 0 0-9.131-9.131Zm8.07 10.192L4.904 5.965a6.5 6.5 0 0 0 9.131 9.131ZM4.343 4.343a8 8 0 1 1 11.314 11.314A8 8 0 0 1 4.343 4.343Z" clip-rule="evenodd" />
+              </svg>
+          </span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+{% endif %}

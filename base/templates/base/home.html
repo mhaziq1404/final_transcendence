@@ -1,0 +1,83 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<main class="d-flex flex-column pt-4 ps-4 pe-4 pb-4 h-100" style="background-color: #1a202c; min-height: 39.75rem;">
+  <!-- New Container -->
+  <div class="w-100 mb-4 p-4 text-center rounded bg-dark">
+    <p class="text-white fs-4 mb-3">Welcome to the Ultimate Pong Game Web App!</p>
+    <p class="text-secondary mb-4">Join us for an exciting and competitive experience. Challenge your friends or meet new players from the campus. Let the games begin!</p>
+    <div class="d-flex justify-content-center gap-3">
+      <a href="{% url 'ai_playnow' %}" class="btn btn-teal text-white fw-semibold px-4 py-2">
+        Play Now
+      </a>
+      <a href="#" id="joinRoomBtn" class="btn btn-indigo text-white fw-semibold px-4 py-2">
+        Join a Room
+      </a>
+    </div>
+  </div>
+
+  <!-- Modal Structure -->
+  <div id="joinRoomModal" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50 d-none" style="z-index: 10;">
+    <div class="bg-white rounded p-4" style="max-width: 500px; width: 100%;">
+      <h2 class="fs-5 fw-semibold mb-3">Enter Invitation Link</h2>
+      <form id="joinRoomForm" action="{% url 'join_room' %}" method="POST">
+        {% csrf_token %}
+        <input type="text" name="invitation_link" placeholder="Paste your invitation link here" class="form-control mb-3">
+        <div class="d-flex justify-content-end">
+          <button type="button" id="cancelBtn" class="btn btn-secondary me-2">Cancel</button>
+          <button type="submit" class="btn btn-teal">Join</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JavaScript to Handle Modal -->
+  <script>
+    document.getElementById('joinRoomBtn').addEventListener('click', function(event) {
+      event.preventDefault();
+      document.getElementById('joinRoomModal').classList.remove('d-none');
+    });
+
+    document.getElementById('cancelBtn').addEventListener('click', function() {
+      document.getElementById('joinRoomModal').classList.add('d-none');
+    });
+  </script>
+
+  <!-- Existing Containers -->
+  <div class="d-flex flex-row h-100 gap-4">
+    <div class="bg-dark d-flex flex-column" style="width: 40%;">
+      <div class="bg-dark rounded" style="height: 100%;">
+        <div class="d-flex flex-column h-100">
+          <!-- Container that is 20% of the height of the parent container -->
+          <div class="bg-dark d-flex flex-column" style="flex: 0 0 10%;">
+            <div class="d-flex justify-content-between align-items-center p-3">
+              <div>
+                <p class="text-light mb-1">Game Room</p>
+                <p class="text-light mb-0">{{ room_count }} Active Rooms</p>
+              </div>
+              <div>
+                <a href="{% url 'create-room' %}">
+                  <button type="button" class="btn btn-primary">Create Room</button>
+                </a>
+              </div>
+            </div>
+          </div>          
+      
+          <!-- Container that is 80% of the height of the parent container -->
+          <div class="bg-light">
+            {% include 'room/room_list.html' %}
+          </div>
+        </div>
+      </div>
+      
+    </div>
+      
+    <div class="bg-dark rounded col-7">
+      {% include 'chat/chat.html' %}
+    </div>
+</div>
+  
+</main>
+
+{% endblock %}

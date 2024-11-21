@@ -1,0 +1,105 @@
+{% if message.author == user %}
+{% if message.is_invitation == True %}
+    <!-- Invitation Message from Current User -->
+    <div class="col-md-6 p-3 rounded-lg">
+        <div class="d-flex align-items-center justify-content-start flex-row-reverse">
+            <div class="d-flex align-items-center justify-content-center h-10 w-10 rounded-circle bg-indigo-500 flex-shrink-0">
+                {% if message.author.avatar %}
+                    <img src="{{ message.author.avatar.url }}" alt="{{ message.author.username }}'s avatar" class="h-100 w-100 object-cover rounded-circle">
+                {% else %}
+                    {{ message.author.username|slice:":1"|upper }}
+                {% endif %}
+            </div>
+            <div class="relative me-3 text-sm bg-indigo-300 py-2 px-4 shadow rounded text-black">
+                <div>============= Invitation has been Sent. =============</div>
+                <div class="h-1"></div>
+                <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow">
+                    <a href="#">
+                        <h5 class="mb-2 text-2xl font-bold text-gray-900">{{ message.room.name }}</h5>
+                    </a>
+                    <p class="mb-3 font-normal text-gray-700">{{ message.room.description }}.</p>
+                </div>
+                <div class="h-2"></div>
+            </div>
+        </div>
+    </div>
+{% else %}
+<!-- Regular Message from Current User -->
+<div class="d-flex flex-row justify-content-end pt-1">
+    <div>
+      <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">{{ message.body }}</p>
+      <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">You</p>
+    </div>
+    {% if message.author.avatar %}
+        <img src="{{ message.author.avatar.url }}" alt="{{ message.author.username }}'s avatar" class="rounded-circle" style="width: 45px; height: 45px;">
+    {% else %}
+        <span style="width: 60px; height: 60px;">
+            {{ message.author.username|slice:":1"|upper }}
+        </span>
+    {% endif %}
+  </div>
+{% endif %}
+{% else %}
+{% if message.is_invitation == True %}
+    <!-- Invitation Message from Other Users -->
+    <div class="col-md-12 p-3 rounded-lg">
+        <div class="d-flex flex-column align-items-start">
+            <div class="d-flex flex-row align-items-center">
+                <div class="d-flex align-items-center justify-content-center h-10 w-10 rounded-circle bg-indigo-500 flex-shrink-0">
+                    {% if message.author.avatar %}
+                        <a href="{% url 'user-profile' message.author.id %}" class="d-block h-100 w-100 rounded-circle overflow-hidden">
+                            <img src="{{ message.author.avatar.url }}" alt="{{ message.author.username }}'s avatar" class="h-100 w-100 object-cover">
+                        </a>
+                    {% else %}
+                        {{ message.author.username|slice:":1"|upper }}
+                    {% endif %}
+                </div>
+                <div class="relative ms-3 text-sm bg-white py-2 px-4 shadow rounded text-black">
+                    <div>{{ message.body }}</div>
+                    <div class="h-1"></div>
+                    <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow">
+                        <a href="#">
+                            <h5 class="mb-2 text-2xl font-bold text-gray-900">{{ message.room.name }}</h5>
+                        </a>
+                        <p class="mb-3 font-normal text-gray-700">{{ message.room.description }}.</p>
+                        <form id="joinRoomForm" action="{% url 'join_room' %}" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="invitation_link" value="{{ message.room.invitation_link }}" class="w-100 px-4 py-2 border rounded mb-4" readonly>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">
+                                    Join The Room
+                                    <svg class="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="h-2"></div>
+                </div>
+            </div>
+            <!-- Username display below the message content -->
+            <div class="text-xs text-muted mt-1 ms-3">
+                @{{ message.author.username }}
+            </div>
+        </div>
+    </div>
+{% else %}
+    <!-- Regular Message from Other Users -->
+    <div class="d-flex flex-row justify-content-start">
+        {% if message.author.avatar %}
+            <a href="{% url 'user-profile' message.author.id %}">
+                <img src="{{ message.author.avatar.url }}" alt="{{ message.author.username }}'s avatar" class="rounded-circle" style="width: 45px; height: 45px;">
+            </a>
+        {% else %}
+            <span style="width: 60px; height: 60px;">
+                {{ message.author.username|slice:":1"|upper }}
+            </span>
+        {% endif %}
+        <div>
+        <p class="small p-2 ms-3 mb-1 rounded-3 bg-light">{{ message.body }}</p>
+        <p class="small ms-3 mb-3 rounded-3 text-muted">@{{ message.author.username }}</p>
+        </div>
+    </div>
+{% endif %}
+{% endif %}
