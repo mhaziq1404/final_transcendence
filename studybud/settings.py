@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = bool(os.environ.get("DEBUG", default=0))
-DEBUG = True
+DEBUG = False
 
 
 ALLOWED_HOSTS = ['burro-polished-evenly.ngrok-free.app', 'localhost', '127.0.0.1', 'base']
@@ -110,12 +110,12 @@ LOGGING = {
     },
     'root': {
         'handlers': ['logstash'],
-        'level': 'INFO',
+        'level': 'WARNING',
     },
     'loggers': {
         'django': {
             'handlers': ['console', 'logstash'],
-            'level': 'INFO',
+            'level': 'WARNING',
             'propagate': False,
         },
     }
