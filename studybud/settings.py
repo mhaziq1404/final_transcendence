@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = bool(os.environ.get("DEBUG", default=0))
-DEBUG = False
+DEBUG = True
 
 
 ALLOWED_HOSTS = ['burro-polished-evenly.ngrok-free.app', 'localhost', '127.0.0.1', 'base']
@@ -78,6 +78,13 @@ MIDDLEWARE = (
 
 ROOT_URLCONF = 'studybud.urls'
 
+# Elasticsearch Configuration
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': os.environ['ELASTIC_HOSTS']
+    },
+}
+
 # Logging Configuration
 LOGGING = {
     'version': 1,
@@ -110,7 +117,7 @@ LOGGING = {
     },
     'root': {
         'handlers': ['logstash'],
-        'level': 'WARNING',
+        'level': 'INFO',
     },
     'loggers': {
         'django': {
@@ -120,6 +127,7 @@ LOGGING = {
         },
     }
 }
+
 
 TEMPLATES = [
     {
