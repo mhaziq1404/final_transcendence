@@ -30,8 +30,8 @@ services:
     networks:
       - backend_net
     volumes:
-      - static:/app/staticfiles/
-      - media:/app/mediafiles/
+      - static:/usr/share/nginx/html/static
+      - media:/usr/share/nginx/html/static/images
       # - ./services/nginx/conf/default.conf:/etc/nginx/nginx.conf:ro
       - certs:/etc/nginx/ssl
     env_file:
@@ -54,12 +54,12 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     restart: unless-stopped
 
-  node-exporter:
-    image: prom/node-exporter
-    networks:
-      - backend_net
-    ports:
-      - 9100:9100
+  # node-exporter:
+  #   image: prom/node-exporter
+  #   networks:
+  #     - backend_net
+  #   ports:
+  #     - 9100:9100
 
   alertmanager:
     image: prom/alertmanager
@@ -119,9 +119,9 @@ services:
     image: docker.elastic.co/logstash/logstash:8.12.1
     environment:
       - xpack.monitoring.enabled=false
-      - ELASTIC_USER=elastic
+      - ELASTIC_USER=${ELASTIC_USER}
       - ELASTIC_PASSWORD=${ES_PASSWORD}
-      - ELASTIC_HOSTS=http://elasticsearch:9200
+      - ELASTIC_HOSTS=${ELASTIC_HOSTS}
     volumes:
       - ./logstash:/usr/share/logstash/pipeline
     networks:
@@ -130,49 +130,49 @@ services:
       - elasticsearch
     restart: unless-stopped
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.12.1
-    ports:
-      - 5601:5601
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-      - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
-      - TELEMETRY_ENABLED=false
-    networks:
-      - backend_net
-    depends_on:
-      - elasticsearch
-    restart: unless-stopped
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:8.12.1
+  #   ports:
+  #     - 5601:5601
+  #   environment:
+  #     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+  #     - ELASTICSEARCH_USERNAME=kibana_system
+  #     - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+  #     - TELEMETRY_ENABLED=false
+  #   networks:
+  #     - backend_net
+  #   depends_on:
+  #     - elasticsearch
+  #   restart: unless-stopped
 
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    restart: unless-stopped
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--web.enable-lifecycle'
-    ports:
-      - 9090:9090
-    networks:
-      - backend_net
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   container_name: prometheus
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  #     - prometheus_data:/prometheus
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #     - '--storage.tsdb.path=/prometheus'
+  #     - '--web.console.libraries=/etc/prometheus/console_libraries'
+  #     - '--web.console.templates=/etc/prometheus/consoles'
+  #     - '--web.enable-lifecycle'
+  #   ports:
+  #     - 9090:9090
+  #   networks:
+  #     - backend_net
 
-  grafana:
-    image: grafana/grafana-oss:latest
-    container_name: grafana
-    ports:
-      - '3000:3000'
-    volumes:
-      - grafana-data:/var/lib/grafana
-    restart: unless-stopped
-    networks:
-      - backend_net
+  # grafana:
+  #   image: grafana/grafana-oss:latest
+  #   container_name: grafana
+  #   ports:
+  #     - '3000:3000'
+  #   volumes:
+  #     - grafana-data:/var/lib/grafana
+  #   restart: unless-stopped
+  #   networks:
+  #     - backend_net
 
   adminer:
     build:

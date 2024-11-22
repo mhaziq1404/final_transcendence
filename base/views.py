@@ -354,20 +354,7 @@ def deleteRoom(request, pk):
 
 @login_required(login_url='login')
 def ai_playnow(request):
-    room = Room.objects.create(
-        host=request.user,
-        opponent_type="AI",
-        name="vsAIGame",
-        description="vsAIGame",
-        is_2player=True,
-        points=11
-    )
-
-    room.participants.add(request.user)
-    
-    room.save()
-    
-    return redirect('room', pk=room.id)
+    return render(request, 'pong/pong_game_local.html')
 
 
 @login_required(login_url='login')
@@ -520,6 +507,7 @@ def get_game_results_by_username(username):
         return None
 
     address = response.get('address')
+    print(address)
     contract_address = Web3.to_checksum_address(address)
     contract_abi = response.get('abi')
 
@@ -933,6 +921,7 @@ def unblock_group(request, pk):
 def get_blockchain_connection():
     # Set up web3 connection (use your own endpoint)
     rpc_url = os.environ.get("RPC_URL")  # or other RPC URL
+    print(f"Connecting to blockchain at {rpc_url}")
     web3 = Web3(Web3.HTTPProvider(rpc_url))
 
     # Verify connection
