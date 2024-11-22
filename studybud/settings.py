@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET_KEY") or "cawfeajbfanuwfuiwhu38e89y9e3qhmuqye_xwdw_21412"
+SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = bool(os.environ.get("DEBUG", default=0))
 DEBUG = True
@@ -78,13 +78,6 @@ MIDDLEWARE = (
 
 ROOT_URLCONF = 'studybud.urls'
 
-# Elasticsearch Configuration
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': 'elasticsearch:9200'
-    },
-}
-
 # Logging Configuration
 LOGGING = {
     'version': 1,
@@ -107,8 +100,8 @@ LOGGING = {
         'logstash': {
             'level': 'INFO',
             'class': 'logstash.TCPLogstashHandler',
-            'host': 'logstash',  # Replace with your Logstash host
-            'port': 5600,        # Replace with your Logstash port
+            'host': os.environ.get("LOGSTASH_HOST"),
+            'port': os.environ.get("LOGSTASH_PORT"),
             'version': 1,
             'message_type': 'django',
             'fqdn': False,
@@ -127,7 +120,6 @@ LOGGING = {
         },
     }
 }
-
 
 TEMPLATES = [
     {
@@ -156,21 +148,21 @@ ASGI_APPLICATION = 'studybud.asgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django_prometheus.db.backends.postgresql',
-    #     # "NAME": config('POSTGRES_DB'),
-    #     # "USER": config('POSTGRES_USER'),
-    #     # "PASSWORD": config('POSTGRES_PASSWORD'),
-    #     "NAME": os.environ['POSTGRES_DB'],
-    #     "USER": os.environ['POSTGRES_USER'],
-    #     "PASSWORD": os.environ['POSTGRES_PASSWORD'],
-    #     "HOST": 'postgresql',
-    #     "PORT": '5432',
-    # }
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django_prometheus.db.backends.postgresql',
+        # "NAME": config('POSTGRES_DB'),
+        # "USER": config('POSTGRES_USER'),
+        # "PASSWORD": config('POSTGRES_PASSWORD'),
+        "NAME": os.environ['POSTGRES_DB'],
+        "USER": os.environ['POSTGRES_USER'],
+        "PASSWORD": os.environ['POSTGRES_PASSWORD'],
+        "HOST": 'postgresql',
+        "PORT": '5432',
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
 }
 
 from datetime import timedelta
@@ -248,17 +240,17 @@ CORS_ALLOW_ALL_ORIGINS = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # SECURE_SSL_REDIRECT = True
 
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {
-#             "hosts": [("redis", 6379)],
-#         },
-#     },
-# }
-
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
     },
 }
+
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels.layers.InMemoryChannelLayer',
+#     },
+# }

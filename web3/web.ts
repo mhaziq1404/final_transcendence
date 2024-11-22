@@ -19,7 +19,7 @@ const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 3333;
-const chain = defineChain(11155111);
+const chain = defineChain(534351);
 
 let client: ThirdwebClient, contract: ContractOptions<Abi>;
 let account: Account;
