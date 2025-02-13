@@ -1,4 +1,4 @@
-# super-fiesta-django
+# final_transcendence
 
 ## Setup
 
